@@ -1,5 +1,5 @@
 # File         : GPS_ACC_integration                                                                               # 
-# author       : Nariman Alaa - Dalia Abdullah                                                                     #
+# author       : Menna Abdellatif                                                              #
 # Description  : This file gets the accelerometr and GPS readings and parse it                                     #
 #                Then send their data to the stm32 microcontroller to take action depend on accelerometr status    #
 # version      : 1.0.0                                                                                             #
