@@ -49,12 +49,12 @@ int main(void)
 	/******************************************** Configure UART1 ,UART6  Pins******************************************/
 	/*************************************************************************************************************************/
 
-	MGPIO_voidSetPinMode (_GPIOA_PORT, _PIN_9, _MODE_ALTF);    //TX-->UART1
-	MGPIO_voidSetPinMode(_GPIOA_PORT, _PIN_10, _MODE_ALTF);    //RX-->UART1
-	MGPIO_voidSetPinMode(_GPIOA_PORT, _PIN_11, _MODE_ALTF);    //TX-->UART6
-	MGPIO_voidSetPinMode(_GPIOA_PORT, _PIN_12, _MODE_ALTF);    //RX-->UART6
-	MGPIO_voidSetPinAltFn  (_GPIOA_PORT, _PIN_9, _ALTFN_7);    //TX-->UART1
-	MGPIO_voidSetPinAltFn (_GPIOA_PORT, _PIN_10, _ALTFN_7);    //RX-->UART1
+	MGPIO_voidSetPinMode (_GPIOA_PORT, _PIN_9, _MODE_ALTF);   
+	MGPIO_voidSetPinMode(_GPIOA_PORT, _PIN_10, _MODE_ALTF);   
+	MGPIO_voidSetPinMode(_GPIOA_PORT, _PIN_11, _MODE_ALTF);   
+	MGPIO_voidSetPinMode(_GPIOA_PORT, _PIN_12, _MODE_ALTF);  
+	MGPIO_voidSetPinAltFn  (_GPIOA_PORT, _PIN_9, _ALTFN_7);    
+	MGPIO_voidSetPinAltFn (_GPIOA_PORT, _PIN_10, _ALTFN_7);   
 	/*************************************************************************************************************************/
 		/******************************************** Configure TIMER2 PIN  Pins******************************************/
 		/*************************************************************************************************************************/
