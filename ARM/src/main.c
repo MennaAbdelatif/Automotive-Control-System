@@ -16,11 +16,13 @@ u8 x=0;
 u8 y=0;
 u8 lat[30];
 u8 longt[30];
-u8 mobileNumber[] = "+201015244400";  // Enter the Mobile Number you want to send to
 u8 ATcommand[80];
 u8 buffer[30] = {0};
 u8 ATisOK = 0;
-
+u8 mobileNumbers[2][15] = {
+    "+201015244400",  
+    "+201275255110"  
+};
 int main(void)
 {
 	/*************************************************************************************************************************/
@@ -63,7 +65,7 @@ int main(void)
 
 			MGPIO_voidSetPinMode(_GPIOA_PORT, _PIN_5,  _MODE_ALTF) ;
 			MGPIO_voidSetPinAltFn      (_GPIOA_PORT,_PIN_5,_ALTFN_1);
-
+			
 	/*************************************************************************************************************************/
 	/********************************************Step 4: initialize Output Pins  in System ***********************************/
 	/*************************************************************************************************************************/
@@ -82,8 +84,8 @@ int main(void)
 	/********************************************Step 5: Enable Peripherials interrupt from NVIC *****************************/
 	/*************************************************************************************************************************/
 
-	MNVIC_voidEnableInterrupt(37) ;              //Enable uart1 from NVIC
-
+	MNVIC_voidEnableInterrupt(37) ;            
+	MNVIC_voidEnableInterrupt(71);
 	/*************************************************************************************************************************/
 	/********************************************Step 6: Initialize USART1 ***************************************************/
 	/*************************************************************************************************************************/
@@ -108,14 +110,13 @@ int main(void)
 	if(strstr((char *)buffer,"OK")){
     ATisOK = 1;
 }
-    HAL_Delay(1000);
     memset(buffer,0,sizeof(buffer));
+	HAL_Delay(500);
+
      }
      sprintf(ATcommand,"AT+CMGF=1\r\n");// Configuring TEXT mode
      MUSART_u8SendData(1,(u8 *)ATcommand,strlen(ATcommand) );
-     L_u8msg1= MUSART_u8ReadData (1);
      HAL_Delay(1000);
-     memset(buffer,0,sizeof(buffer));
 
 	/* Loop forever */
 	while(1)
@@ -158,28 +159,37 @@ if(L_u8msg=='G')
             memset(longt, 0, sizeof(longt));
 
             /* Read GPS Latitude */
-            while ((L_u8msg1 = MUSART_u8ReadData(6)) != '3' && x < sizeof(lat) - 1)
+            while ((L_u8msg1 = MUSART_u8ReadData(6)) != '*' && x < sizeof(lat) - 1)
                 lat[x++] = L_u8msg1;
-            lat[x] = '\0';
+            	lat[x] = '\0';
 
             /* Read GPS Longitude */
             while ((L_u8msg1 = MUSART_u8ReadData(6)) != '#' && y < sizeof(longt) - 1)
                 longt[y++] = L_u8msg1;
-            longt[y] = '\0';
+           		longt[y] = '\0';
 
             /* Send SMS via GSM */
-            snprintf((char *)ATcommand, sizeof(ATcommand), "AT+CMGS=\"%s\"\r\n", mobileNumber);
-            MUSART_u8SendData(1, (u8 *)ATcommand, strlen(ATcommand));
-            HAL_Delay(100);
+       for (int num = 0; num < 2; num++) // <-- Updated: loop through both numbers
+            {
+                sprintf((char *)ATcommand, "AT+CMGS=\"%s\"\r\n", mobileNumbers[num]);
+                MUSART_u8SendData(1, ATcommand, strlen((char *)ATcommand));
+                HAL_Delay(500);
 
-            snprintf((char *)ATcommand, sizeof(ATcommand),
-                     "Accident detected! Latitude: %s, Longitude: %s\r\n", lat, longt);
-            MUSART_u8SendData(1, (u8 *)ATcommand, strlen(ATcommand));
+                sprintf((char *)ATcommand, "%s Latitude: %s Longitude: %s\r\n",  "Accident detected! Vehicle location:\r\n", lat, longt);
+                MUSART_u8SendData(1, ATcommand, strlen((char *)ATcommand));
+                HAL_Delay(500);
+                MUSART_u8SendData(1, (u8 *)"\x1A", 1);
+                HAL_Delay(4000);
+			}
+            sprintf((char *)ATcommand, "AT+CMGS=\"%s\"\r\n", mobileNumbers[1]); 
+            MUSART_u8SendData(1, ATcommand, strlen((char *)ATcommand));
+            HAL_Delay(500);
+            sprintf((char *)ATcommand, "%s Latitude: %s Longitude: %s\r\n", "Vehicle live location:\r\n", lat, longt);
+            MUSART_u8SendData(1, ATcommand, strlen((char *)ATcommand));
             HAL_Delay(500);
             MUSART_u8SendData(1, (u8 *)"\x1A", 1);
             HAL_Delay(4000);
-
-            flag = 1; 
+            flag = 1;
         }
     }
 }
