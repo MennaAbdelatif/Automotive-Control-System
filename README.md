@@ -1,2 +1,2 @@
 # Automotive-Control-System
-The project is an accident detection and live monitoring system that integrates embedded hardware, MQTT communication, a Flask backend, and a React and TypeScript dashboard
+TDesigned and implemented an IoT-based embedded system using Raspberry Pi, ADXL345 accelerometer, and GPS module for real-time accident detection. Data is transmitted via MQTT protocol to a Flask backend that provides REST APIs consumed by a React + TypeScript dashboard for live visualization and analytics. Integrated UART communication, paho-mqtt, and pynmea2 for reliable sensor data parsing and messaging.
