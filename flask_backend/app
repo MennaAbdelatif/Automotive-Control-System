@@ -1,0 +1,77 @@
+from flask import Flask, jsonify
+from flask_cors import CORS
+import random
+import serial
+
+app = Flask(__name__)
+CORS(app)  
+
+accidents_data = [
+    {"id": 1, "carId": "CAR_001", "time": "2025-10-24 09:30:00", "location": "Cairo"},
+    {"id": 2, "carId": "CAR_002", "time": "2025-10-24 10:15:00", "location": "Giza"},
+]
+
+gps_history = []
+
+GPS_PORT = "/dev/ttyUSB0"  
+GPS_BAUDRATE = 9600
+
+def read_gps():
+    """Read GPS coordinates from the module."""
+    try:
+        with serial.Serial(GPS_PORT, GPS_BAUDRATE, timeout=1) as ser:
+            while True:
+                line = ser.readline().decode('ascii', errors='replace')
+                if line.startswith('$GPGGA'):  
+                    parts = line.split(',')
+                    if parts[2] and parts[4]:  
+                        lat = float(parts[2])
+                        lon = float(parts[4])
+
+                        lat_deg = int(lat / 100)
+                        lat_min = lat - lat_deg * 100
+                        latitude = lat_deg + lat_min / 60
+                        if parts[3] == 'S':
+                            latitude = -latitude
+
+                        lon_deg = int(lon / 100)
+                        lon_min = lon - lon_deg * 100
+                        longitude = lon_deg + lon_min / 60
+                        if parts[5] == 'W':
+                            longitude = -longitude
+
+                        location = {"latitude": latitude, "longitude": longitude}
+
+                        gps_history.append(location)
+                        if len(gps_history) > 50:
+                            gps_history.pop(0)
+
+                        return location
+    except Exception as e:
+        print("GPS Error:", e)
+
+    return {"latitude": 30.12345, "longitude": 31.54321}
+
+@app.route("/api/metrics")
+def get_metrics():
+    metrics = {
+        "totalAccidents": len(accidents_data),
+        "alertsSent": random.randint(2, 10)  
+    }
+    return jsonify(metrics)
+
+@app.route("/api/location")
+def get_location():
+    location = read_gps()
+    return jsonify(location)
+
+@app.route("/api/path")
+def get_path():
+    return jsonify(gps_history)
+
+@app.route("/api/accidents")
+def get_accidents():
+    return jsonify(accidents_data)
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000, debug=True)
